@@ -1,40 +1,79 @@
-import numpy as np
+grid = [[0, 1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0]]
 
-def printArray(A):
-    A = np.char.mod('%d', A)
-    A = np.char.replace(A, '0', 'X', count=1)
-    print(A)
+heuristic = [[9, 8, 7, 6, 5, 4],
+             [8, 7, 6, 5, 4, 3],
+             [7, 6, 5, 4, 3, 2],
+             [6, 5, 4, 3, 2, 1],
+             [5, 4, 3, 2, 1, 0]]
 
-def Input():
-    print("Enter values in row major order:")
-    inp = []
-    for i in range(9):
-        inp.append(int(input()))
-    inp = np.reshape(np.array(inp), (3, 3))
-    return inp
+init = [0, 0]
+goal = [len(grid)-1, len(grid[0])-1]
+cost = 1
 
-def H(A):
-    pass
+delta = [[-1, 0 ], # go up
+         [ 0, -1], # go left
+         [ 1, 0 ], # go down
+         [ 0, 1 ]] # go right
 
-def left(A):
+delta_name = ['^', '<', 'v', '>']
+
+def search(grid,init,goal,cost,heuristic):
+    # ----------------------------------------
+    # modify the code below
+    # ----------------------------------------
+    closed = [[0 for col in range(len(grid[0]))] for row in range(len(grid))]
+    closed[init[0]][init[1]] = 1
+
+    expand = [[-1 for col in range(len(grid[0]))] for row in range(len(grid))]
+    action = [[-1 for col in range(len(grid[0]))] for row in range(len(grid))]
+
+    x = init[0]
+    y = init[1]
+    g = 0
+    f = g + heuristic[x][y]
+
+    open = [[f, g, x, y]]
+
+    found = False  # flag that is set when search is complete
+    resign = False # flag set if we can't find expand
+    count = 0
     
+    while not found and not resign:
+        if len(open) == 0:
+            resign = True
+            return "Fail"
+        else:
+            open.sort()
+            open.reverse()
+            next = open.pop()
+            f = next[0]
+            g = next[1]
+            x = next[2]
+            y = next[3]
+            
+            expand[x][y] = count
+            count += 1
+            
+            if x == goal[0] and y == goal[1]:
+                found = True
+            else:
+                for i in range(len(delta)):
+                    x2 = x + delta[i][0]
+                    y2 = y + delta[i][1]
+                    if x2 >= 0 and x2 < len(grid) and y2 >=0 and y2 < len(grid[0]):
+                        if closed[x2][y2] == 0 and grid[x2][y2] == 0:
+                            g2 = g + cost
+                            f = g2 + heuristic[x2][y2]
+                            open.append([f, g2, x2, y2])
+                            closed[x2][y2] = 1
+                            
+    return expand
 
-def expand(A):
-    return [left(A), top(A), right(A), bottom(A)]
+result = search(grid,init,goal,cost,heuristic)
 
-class node():
-    def __init__(self, state, i) -> None:
-        self.state = state
-        self.fox = H(state) + i
-        self.left = None
-        self.right = None
-
-goal = np.array([0, 1, 2 ,3, 4, 5, 6, 7, 8])
-goal = np.reshape(goal, (3, 3))
-state = Input()
-explored = []
-fringe = expand(state)
-
-
-
-
+for el in result:
+	print (el)
